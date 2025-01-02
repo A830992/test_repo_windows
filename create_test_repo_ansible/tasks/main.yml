@@ -1,0 +1,31 @@
+---
+- name: install RSCD agent for windows
+  hosts: Windows
+  gather_fact: yes
+  tasks:
+    - name: download package
+      win_get_url:
+        url: "xxx"
+        dest: "C:\\temp\test"
+       register: RSCD_agent_Downloaded
+       when: install_rscd == true
+
+    - name: servce restrt:
+      
+    - name: Clean up RSCD installer
+      win_file:
+        path: "C:\\Temp\\rscd-agent-installer.exe"
+        state: absent
+      when: install_rscd.rc == 0
+
+    - name: Add RSCD Agent Configuration (if required)
+      win_template:
+        src: "rscd_config.ini.j2"  # Your Jinja2 template for configuration
+        dest: "C:\\Program Files\\rscd\\rscd_config.ini"
+      when: install_rscd.rc == 0
+
+    - name: Restart RSCD Agent (if configuration is updated)
+      win_service:
+        name: "rscd"
+        state: restarted
+      when: install_rscd.rc == 0 and ansible_facts.services['rscd'] is not defined
