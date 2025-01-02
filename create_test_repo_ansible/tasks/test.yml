@@ -1,0 +1,32 @@
+---
+- name: Install and Configure RSCD Agent on Windows
+  hosts: windows
+  gather_facts: yes
+  tasks:
+    - name: Download the RSCD Agent Installer
+      win_get_url:
+        url: "https://<your_rscd_package_url>"
+        dest: "C:\\Temp\\rscd-agent-installer.exe"
+      register: download_rscd_installer
+
+    - name: Ensure the Temp directory exists
+      win_file:
+        path: "C:\\Temp"
+        state: directory
+
+    - name: Install RSCD Agent
+      win_command: "C:\\Temp\\rscd-agent-installer.exe /quiet /norestart"
+      register: install_rscd
+      ignore_errors: yes
+
+    - name: Verify RSCD Agent Service is Running
+      win_service:
+        name: "rscd"
+        state: started
+      when: install_rscd.rc == 0
+
+    - name: Clean up RSCD installer
+      win_file:
+        path: "C:\\Temp\\rscd-agent-installer.exe"
+        state: absent
+      when: install_rscd.rc == 0
