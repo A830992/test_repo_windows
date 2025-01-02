@@ -30,3 +30,7 @@
         path: "C:\\Temp\\rscd-agent-installer.exe"
         state: absent
       when: install_rscd.rc == 0
+
+    - name: this will gav the outpit message
+      debug:
+        msg: "serbice installed "
